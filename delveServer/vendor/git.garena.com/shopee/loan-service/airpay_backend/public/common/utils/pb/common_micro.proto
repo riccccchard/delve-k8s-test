@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package common.micro;
+
+//option go_package = "git.garena.com/shopee/loan-service/airpay_backend/public/common/utils/pb/micro";
+
+message ExtraMsg {
+    string show_message = 1;
+    bytes reply =2;
+}

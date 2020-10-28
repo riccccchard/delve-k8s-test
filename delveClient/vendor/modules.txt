@@ -1,0 +1,44 @@
+# github.com/go-delve/delve v1.5.1-0.20200915214930-85952c08267b
+## explicit
+github.com/go-delve/delve/pkg/astutil
+github.com/go-delve/delve/pkg/config
+github.com/go-delve/delve/pkg/dwarf/frame
+github.com/go-delve/delve/pkg/dwarf/godwarf
+github.com/go-delve/delve/pkg/dwarf/line
+github.com/go-delve/delve/pkg/dwarf/loclist
+github.com/go-delve/delve/pkg/dwarf/op
+github.com/go-delve/delve/pkg/dwarf/reader
+github.com/go-delve/delve/pkg/dwarf/util
+github.com/go-delve/delve/pkg/gobuild
+github.com/go-delve/delve/pkg/goversion
+github.com/go-delve/delve/pkg/locspec
+github.com/go-delve/delve/pkg/logflags
+github.com/go-delve/delve/pkg/proc
+github.com/go-delve/delve/pkg/proc/core
+github.com/go-delve/delve/pkg/proc/core/minidump
+github.com/go-delve/delve/pkg/proc/fbsdutil
+github.com/go-delve/delve/pkg/proc/gdbserial
+github.com/go-delve/delve/pkg/proc/linutil
+github.com/go-delve/delve/pkg/proc/native
+github.com/go-delve/delve/pkg/proc/winutil
+github.com/go-delve/delve/service
+github.com/go-delve/delve/service/api
+github.com/go-delve/delve/service/debugger
+github.com/go-delve/delve/service/rpc2
+# github.com/hashicorp/golang-lru v0.5.4
+github.com/hashicorp/golang-lru/simplelru
+# github.com/konsorten/go-windows-terminal-sequences v1.0.3
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/mattn/go-isatty v0.0.3
+github.com/mattn/go-isatty
+# github.com/sirupsen/logrus v1.6.0
+github.com/sirupsen/logrus
+# golang.org/x/arch v0.0.0-20190927153633-4e8777c89be4
+golang.org/x/arch/arm64/arm64asm
+golang.org/x/arch/x86/x86asm
+# golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# gopkg.in/yaml.v2 v2.2.1
+gopkg.in/yaml.v2
