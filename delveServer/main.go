@@ -154,7 +154,7 @@ func main(){
         address := r.Header.Get("address")
         myServer := &DelveServer{}
         myServer.SetAddress(address)
-        err = myServer.InitServer(pid , true , address , 1500 * time.Second)
+        err = myServer.InitServer(pid , false , address , 1500 * time.Second)
 
         if err != nil{
 	    fmt.Fprintln(w, "[Main]Failed to Init Server")

@@ -28,6 +28,7 @@ spec:
           capabilities:
             add:
               - SYS_PTRACE
+              - SYS_ADMIN
         volumeMounts:
           - name: socket-path
             mountPath: /var/run/docker.sock
@@ -46,7 +47,7 @@ spec:
         - containerPort: 8888
         resources:
           limits:
-            memory: "200Mi"
+            memory: "500Mi"
           requests:
             memory: "100Mi"
       terminationGracePeriodSeconds: 30
