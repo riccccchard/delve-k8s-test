@@ -7,21 +7,30 @@ import (
     "net/http"
     "strconv"
     "strings"
+    "time"
 )
 
 
 func main(){
     http.HandleFunc("/" , func(w http.ResponseWriter , r *http.Request){
         address := r.Header.Get("address")
+        timestr := r.Header.Get("time")
+        waitTime , err := strconv.Atoi(timestr)
+        if err != nil{
+            waitTime = 30
+        }
         client := rpc2.NewClient(address)
         client.SetReturnValuesLoadConfig(&api.LoadConfig{})
-        status , err := client.Halt()
-        if err != nil{
-            msg := fmt.Sprintf("Failed to let process halt , error - %s", err.Error())
-            fmt.Fprintln(w, msg)
-            return
+        if client.IsMulticlient(){
+            //如果接受multiclient，则在attach时候会让目标程序继续运行
+            status , err := client.Halt()
+            if err != nil{
+               msg := fmt.Sprintf("Failed to let process halt , error - %s", err.Error())
+               fmt.Fprintln(w, msg)
+               return
+            }
+            fmt.Fprintf(w , "%+v\n", status)
         }
-        fmt.Fprintf(w , "%+v\n", status)
 
         breakpoints , err := client.ListBreakpoints()
         if err != nil{
@@ -76,41 +85,52 @@ func main(){
             return
         }
         fmt.Fprintf(w, "Breakpoints: %+v", b0)
+        timeTicker := time.NewTicker( time.Second * time.Duration(waitTime))
 
-        status = <- client.Continue()
-        if status.CurrentThread != nil {
-            fmt.Fprintf(w, "File&Line : %s:%d , pc : 0x%s\n", status.CurrentThread.File, status.CurrentThread.Line, strconv.FormatUint(status.CurrentThread.PC, 16))
-        }
+        for{
+            select {
+            case <- timeTicker.C:{
+                fmt.Fprintf(w , "time has come.")
+                goto timedone
+            }
+            default:
+                status := <- client.Continue()
+                if status.CurrentThread != nil {
+                    fmt.Fprintf(w, "File&Line : %s:%d , pc : 0x%s\n", status.CurrentThread.File, status.CurrentThread.Line, strconv.FormatUint(status.CurrentThread.PC, 16))
+                }
 
-        regs, err := client.ListScopeRegisters(api.EvalScope{
-            GoroutineID: -1,
-        }, true)
-        if err != nil {
-            msg := fmt.Sprintf("Failed to List Scope Register , error - %s", err.Error())
-            fmt.Fprintf(w , msg)
-            return
-        }
-        for _, reg := range regs {
-            if reg.Name == "Rsp" {
-                value, err := strconv.ParseInt(strings.Trim(reg.Value, "\""), 0, 64)
+                regs, err := client.ListScopeRegisters(api.EvalScope{
+                    GoroutineID: -1,
+                }, true)
                 if err != nil {
-                    msg := fmt.Sprintf("Failed to convert value , error - %s", err.Error())
+                    msg := fmt.Sprintf("Failed to List Scope Register , error - %s", err.Error())
                     fmt.Fprintf(w , msg)
                     return
                 }
-                expr := fmt.Sprintf("*(*error)(%d) = \"database/sql/driver\".ErrBadConn", value+0x48)
-                state, err := client.Call(-1, expr, false)
+                for _, reg := range regs {
+                    if reg.Name == "Rsp" {
+                        value, err := strconv.ParseInt(strings.Trim(reg.Value, "\""), 0, 64)
+                        if err != nil {
+                            msg := fmt.Sprintf("Failed to convert value , error - %s", err.Error())
+                            fmt.Fprintf(w , msg)
+                            return
+                        }
+                        expr := fmt.Sprintf("*(*error)(%d) = \"database/sql/driver\".ErrBadConn", value+0x48)
+                        state, err := client.Call(-1, expr, false)
 
-                if err != nil {
-                    msg := fmt.Sprintf("Failed to call expr, error - %s", err.Error())
-                    fmt.Fprintf(w , msg)
-                    return
-                }
-                if state.CurrentThread != nil {
-                    fmt.Fprintf(w, "File&Line : %s:%d , pc : 0x%s\n", state.CurrentThread.File, state.CurrentThread.Line, strconv.FormatUint(state.CurrentThread.PC, 16))
+                        if err != nil {
+                            msg := fmt.Sprintf("Failed to call expr, error - %s", err.Error())
+                            fmt.Fprintf(w , msg)
+                            return
+                        }
+                        if state.CurrentThread != nil {
+                            fmt.Fprintf(w, "File&Line : %s:%d , pc : 0x%s\n", state.CurrentThread.File, state.CurrentThread.Line, strconv.FormatUint(state.CurrentThread.PC, 16))
+                        }
+                    }
                 }
             }
         }
+timedone:
         client.Disconnect(true)
         fmt.Fprintf(w, "client done.\n")
     })
